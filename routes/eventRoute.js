@@ -1,15 +1,21 @@
 import express from "express";
+
 import authMiddleware from "../middlewares/authMiddleware.js";
 import checkRole from "../middlewares/checkRole.js";
 import validate from "../middlewares/validateMiddleware.js";
-import { createEventSchema, updateEventSchema } from "../validators/eventValidator.js";
+import upload from "../middlewares/upload.js";
+
+import {
+    createEventSchema,
+    updateEventSchema,
+} from "../validators/eventValidator.js";
 
 import {
     getEvents,
     getEventById,
     createEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
 } from "../controllers/eventController.js";
 
 const router = express.Router();
@@ -22,6 +28,7 @@ router.post(
     "/",
     authMiddleware,
     checkRole("admin", "superadmin"),
+    upload.single("poster"),
     validate(createEventSchema),
     createEvent
 );
@@ -30,6 +37,7 @@ router.put(
     "/:id",
     authMiddleware,
     checkRole("admin", "superadmin"),
+    upload.single("poster"),
     validate(updateEventSchema),
     updateEvent
 );
@@ -37,7 +45,7 @@ router.put(
 router.delete(
     "/:id",
     authMiddleware,
-    checkRole("admin","superadmin"),
+    checkRole("admin", "superadmin"),
     deleteEvent
 );
 
