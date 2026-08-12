@@ -95,18 +95,22 @@ export const create = async (data) => {
             title,
             description,
             location,
+            latitude,
+            longitude,
             poster,
             event_date,
             start_time,
             status
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
         [
             data.admin_id,
             data.title,
             data.description,
             data.location,
+            data.latitude,
+            data.longitude,
             data.poster,
             data.event_date,
             data.start_time,
@@ -125,6 +129,8 @@ export const update = async (id, data) => {
             title = ?,
             description = ?,
             location = ?,
+            latitude = ?,
+            longitude = ?,
             poster = ?,
             event_date = ?,
             start_time = ?,
@@ -136,6 +142,8 @@ export const update = async (id, data) => {
             data.title,
             data.description,
             data.location,
+            data.latitude,
+            data.longitude,
             data.poster,
             data.event_date,
             data.start_time,
