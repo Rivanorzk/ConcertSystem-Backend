@@ -1,7 +1,6 @@
 import db from "../lib/database.js";
 
 export const getTicketCategories = async () => {
-
     const [rows] = await db.query(`
         SELECT
             tc.*,
@@ -13,29 +12,38 @@ export const getTicketCategories = async () => {
     `);
 
     return rows;
-
 };
 
 export const getTicketCategoryById = async (id) => {
-
     const [rows] = await db.query(
         `
-        SELECT *
-        FROM ticket_categories
-        WHERE id = ?
+        SELECT
+            tc.*,
+            e.title AS event_title
+        FROM ticket_categories tc
+        LEFT JOIN events e
+            ON tc.event_id = e.id
+        WHERE tc.id = ?
+        LIMIT 1
         `,
         [id]
     );
 
     return rows[0];
-
 };
 
 export const getTicketCategoriesByEvent = async (eventId) => {
-
     const [rows] = await db.query(
         `
-        SELECT *
+        SELECT
+            id,
+            event_id,
+            category_name,
+            price,
+            stock,
+            remaining_stock,
+            created_at,
+            updated_at
         FROM ticket_categories
         WHERE event_id = ?
         ORDER BY price ASC
@@ -44,11 +52,9 @@ export const getTicketCategoriesByEvent = async (eventId) => {
     );
 
     return rows;
-
 };
 
 export const createTicketCategory = async (data) => {
-
     const [result] = await db.query(
         `
         INSERT INTO ticket_categories (
@@ -56,10 +62,9 @@ export const createTicketCategory = async (data) => {
             category_name,
             price,
             stock,
-            remaining_stock,
-            description
+            remaining_stock
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
         `,
         [
             data.event_id,
@@ -67,41 +72,32 @@ export const createTicketCategory = async (data) => {
             data.price,
             data.stock,
             data.stock,
-            data.description
         ]
     );
 
     return result.insertId;
-
 };
 
 export const updateTicketCategory = async (id, data) => {
-
     await db.query(
         `
         UPDATE ticket_categories
         SET
             category_name = ?,
             price = ?,
-            stock = ?,
-            remaining_stock = ?,
-            description = ?
+            stock = ?
         WHERE id = ?
         `,
         [
             data.category_name,
             data.price,
             data.stock,
-            data.remaining_stock,
-            data.description,
-            id
+            id,
         ]
     );
-
 };
 
 export const deleteTicketCategory = async (id) => {
-
     await db.query(
         `
         DELETE FROM ticket_categories
@@ -109,7 +105,6 @@ export const deleteTicketCategory = async (id) => {
         `,
         [id]
     );
-
 };
 
 export const updateRemainingStock = async (
@@ -117,29 +112,29 @@ export const updateRemainingStock = async (
     id,
     quantity
 ) => {
-
     await connection.query(
         `
         UPDATE ticket_categories
         SET remaining_stock = remaining_stock - ?
         WHERE id = ?
+          AND remaining_stock >= ?
         `,
-        [quantity, id]
+        [quantity, id, quantity]
     );
-
 };
 
 export const getTicketCategoryByIdForUpdate = async (
     connection,
     id
 ) => {
-
     const [rows] = await connection.query(
         `
         SELECT
             id,
+            event_id,
             category_name,
             price,
+            stock,
             remaining_stock
         FROM ticket_categories
         WHERE id = ?
@@ -149,7 +144,6 @@ export const getTicketCategoryByIdForUpdate = async (
     );
 
     return rows[0];
-
 };
 
 export const increaseRemainingStock = async (
@@ -157,14 +151,16 @@ export const increaseRemainingStock = async (
     id,
     quantity
 ) => {
-
     await connection.query(
         `
         UPDATE ticket_categories
-        SET remaining_stock = remaining_stock + ?
+        SET
+            remaining_stock = LEAST(
+                remaining_stock + ?,
+                stock
+            )
         WHERE id = ?
         `,
         [quantity, id]
     );
-
 };
