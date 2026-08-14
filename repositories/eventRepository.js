@@ -8,6 +8,9 @@ export async function findAll({
         SELECT
             e.id,
             e.admin_id,
+            e.category_id,
+            c.category_name,
+            c.icon AS category_icon,
             e.title,
             e.description,
             e.location,
@@ -19,6 +22,8 @@ export async function findAll({
             e.updated_at,
             MIN(tc.price) AS lowest_price
         FROM events e
+        LEFT JOIN categories c
+            ON c.id = e.category_id
         LEFT JOIN ticket_categories tc
             ON tc.event_id = e.id
         WHERE 1 = 1
@@ -38,6 +43,9 @@ export async function findAll({
         GROUP BY
             e.id,
             e.admin_id,
+            e.category_id,
+            c.category_name,
+            c.icon,
             e.title,
             e.description,
             e.location,
@@ -72,14 +80,31 @@ export const findById = async (id) => {
     const [rows] = await db.query(
         `
         SELECT
-            e.*,
-            u.id AS admin_id,
-            u.username,
-            u.email
+            e.id,
+            e.admin_id,
+            e.category_id,
+            c.category_name,
+            c.icon AS category_icon,
+            e.title,
+            e.description,
+            e.location,
+            e.latitude,
+            e.longitude,
+            e.poster,
+            e.event_date,
+            e.start_time,
+            e.status,
+            e.created_at,
+            e.updated_at,
+            u.username AS admin_username,
+            u.email AS admin_email
         FROM events e
+        LEFT JOIN categories c
+            ON c.id = e.category_id
         LEFT JOIN users u
             ON e.admin_id = u.id
         WHERE e.id = ?
+        LIMIT 1
         `,
         [id]
     );
@@ -92,6 +117,7 @@ export const create = async (data) => {
         `
         INSERT INTO events (
             admin_id,
+            category_id,
             title,
             description,
             location,
@@ -102,10 +128,11 @@ export const create = async (data) => {
             start_time,
             status
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
         [
             data.admin_id,
+            data.category_id,
             data.title,
             data.description,
             data.location,
@@ -126,6 +153,7 @@ export const update = async (id, data) => {
         `
         UPDATE events
         SET
+            category_id = ?,
             title = ?,
             description = ?,
             location = ?,
@@ -139,6 +167,7 @@ export const update = async (id, data) => {
         WHERE id = ?
         `,
         [
+            data.category_id,
             data.title,
             data.description,
             data.location,
