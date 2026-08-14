@@ -12,6 +12,10 @@ export const createEventSchema = Joi.object({
             "any.required": "Event title is required",
         }),
 
+    category_id: Joi.number()
+        .integer()
+        .required(),
+
     description: Joi.string()
         .allow("")
         .optional(),
@@ -60,6 +64,10 @@ export const createEventSchema = Joi.object({
 
 
 export const updateEventSchema = Joi.object({
+    category_id: Joi.number()
+        .integer()
+        .optional(),
+        
     title: Joi.string()
         .trim()
         .min(3)
