@@ -30,10 +30,12 @@ export const getEventById = asyncHandler(async (req, res) => {
 });
 
 export const createEvent = asyncHandler(async (req, res) => {
-
     const event = await eventService.createEvent(
         req.user.id,
-        req.body
+        {
+            ...req.body,
+            poster: req.file?.path,
+        }
     );
 
     return success(
@@ -42,14 +44,17 @@ export const createEvent = asyncHandler(async (req, res) => {
         "Event berhasil dibuat",
         201
     );
-
 });
 
 export const updateEvent = asyncHandler(async (req, res) => {
-
     const event = await eventService.updateEvent(
         req.params.id,
-        req.body
+        {
+            ...req.body,
+            ...(req.file
+                ? { poster: req.file.path }
+                : {}),
+        }
     );
 
     return success(
@@ -57,7 +62,6 @@ export const updateEvent = asyncHandler(async (req, res) => {
         event,
         "Event berhasil diperbarui"
     );
-
 });
 
 export const deleteEvent = asyncHandler(async (req, res) => {
