@@ -5,7 +5,6 @@ export const findAll = async () => {
         SELECT
             id,
             category_name,
-            description,
             icon,
             created_at
         FROM categories
@@ -20,7 +19,6 @@ export const findById = async (id) => {
         SELECT
             id,
             category_name,
-            description,
             icon,
             created_at
         FROM categories
@@ -36,7 +34,6 @@ export const findByName = async (categoryName) => {
         SELECT
             id,
             category_name,
-            description,
             icon,
             created_at
         FROM categories
@@ -55,13 +52,11 @@ export const create = async ({
     const [result] = await db.query(`
         INSERT INTO categories (
             category_name,
-            description,
             icon
         )
-        VALUES (?, ?, ?)
+        VALUES (?, ?)
     `, [
         categoryName,
-        description,
         icon,
     ]);
 
@@ -72,7 +67,6 @@ export const update = async (
     id,
     {
         categoryName,
-        description,
         icon,
     }
 ) => {
@@ -80,12 +74,10 @@ export const update = async (
         UPDATE categories
         SET
             category_name = ?,
-            description = ?,
             icon = ?
         WHERE id = ?
     `, [
         categoryName,
-        description,
         icon,
         id,
     ]);
