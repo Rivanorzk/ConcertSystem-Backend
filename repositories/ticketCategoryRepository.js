@@ -1,6 +1,6 @@
 import db from "../lib/database.js";
 
-export const getTicketCategories = async () => {
+export const findAll = async () => {
     const [rows] = await db.query(`
         SELECT
             id,
@@ -15,7 +15,7 @@ export const getTicketCategories = async () => {
     return rows;
 };
 
-export const getTicketCategoryById = async (id) => {
+export const findById = async (id) => {
     const [rows] = await db.query(`
         SELECT
             id,
@@ -31,7 +31,24 @@ export const getTicketCategoryById = async (id) => {
     return rows[0];
 };
 
-export const createTicketCategory = async (data) => {
+export const findByName = async (categoryName) => {
+    const [rows] = await db.query(`
+        SELECT
+            id,
+            category_name,
+            price
+        FROM ticket_categories
+        WHERE category_name = ?
+        LIMIT 1
+    `, [categoryName]);
+
+    return rows[0];
+};
+
+export const create = async ({
+    category_name,
+    price,
+}) => {
     const [result] = await db.query(`
         INSERT INTO ticket_categories (
             category_name,
@@ -39,14 +56,20 @@ export const createTicketCategory = async (data) => {
         )
         VALUES (?, ?)
     `, [
-        data.category_name,
-        data.price,
+        category_name,
+        price,
     ]);
 
-    return getTicketCategoryById(result.insertId);
+    return findById(result.insertId);
 };
 
-export const updateTicketCategory = async (id, data) => {
+export const update = async (
+    id,
+    {
+        category_name,
+        price,
+    }
+) => {
     await db.query(`
         UPDATE ticket_categories
         SET
@@ -54,15 +77,15 @@ export const updateTicketCategory = async (id, data) => {
             price = ?
         WHERE id = ?
     `, [
-        data.category_name,
-        data.price,
+        category_name,
+        price,
         id,
     ]);
 
-    return getTicketCategoryById(id);
+    return findById(id);
 };
 
-export const deleteTicketCategory = async (id) => {
+export const remove = async (id) => {
     const [result] = await db.query(`
         DELETE FROM ticket_categories
         WHERE id = ?
