@@ -10,7 +10,6 @@ export async function findAll({
             e.admin_id,
             e.category_id,
             c.category_name,
-            c.icon AS category_icon,
             e.title,
             e.description,
             e.location,
@@ -18,14 +17,16 @@ export async function findAll({
             e.event_date,
             e.start_time,
             e.status,
+            e.latitude,
+            e.longitude,
             e.created_at,
-            e.updated_at,
-            MIN(tc.price) AS lowest_price
+            e.updated_at
+
         FROM events e
+
         LEFT JOIN categories c
             ON c.id = e.category_id
-        LEFT JOIN ticket_categories tc
-            ON tc.event_id = e.id
+
         WHERE 1 = 1
     `;
 
@@ -33,42 +34,45 @@ export async function findAll({
 
     if (search) {
         sql += `
-            AND e.title LIKE ?
+            AND (
+                e.title LIKE ?
+                OR e.location LIKE ?
+                OR c.category_name LIKE ?
+            )
         `;
 
-        values.push(`%${search}%`);
+        const keyword = `%${search}%`;
+
+        values.push(
+            keyword,
+            keyword,
+            keyword
+        );
     }
 
-    sql += `
-        GROUP BY
-            e.id,
-            e.admin_id,
-            e.category_id,
-            c.category_name,
-            c.icon,
-            e.title,
-            e.description,
-            e.location,
-            e.poster,
-            e.event_date,
-            e.start_time,
-            e.status,
-            e.created_at,
-            e.updated_at
-    `;
-
     switch (sort) {
-        case "price-low":
-            sql += ` ORDER BY lowest_price ASC`;
+        case "latest":
+            sql += `
+                ORDER BY e.created_at DESC
+            `;
             break;
 
-        case "price-high":
-            sql += ` ORDER BY lowest_price DESC`;
+        case "oldest":
+            sql += `
+                ORDER BY e.created_at ASC
+            `;
+            break;
+
+        case "date":
+            sql += `
+                ORDER BY e.event_date ASC
+            `;
             break;
 
         default:
-            sql += ` ORDER BY e.event_date ASC`;
-            break;
+            sql += `
+                ORDER BY e.created_at DESC
+            `;
     }
 
     const [rows] = await db.query(sql, values);
@@ -80,31 +84,22 @@ export const findById = async (id) => {
     const [rows] = await db.query(
         `
         SELECT
-            e.id,
-            e.admin_id,
-            e.category_id,
+            e.*,
             c.category_name,
-            c.icon AS category_icon,
-            e.title,
-            e.description,
-            e.location,
-            e.latitude,
-            e.longitude,
-            e.poster,
-            e.event_date,
-            e.start_time,
-            e.status,
-            e.created_at,
-            e.updated_at,
+
+            u.id AS admin_user_id,
             u.username AS admin_username,
             u.email AS admin_email
+
         FROM events e
+
         LEFT JOIN categories c
             ON c.id = e.category_id
+
         LEFT JOIN users u
             ON e.admin_id = u.id
+
         WHERE e.id = ?
-        LIMIT 1
         `,
         [id]
     );
