@@ -12,8 +12,7 @@ import {
   getTicketCategoryById,
   createTicketCategory,
   updateTicketCategory,
-  deleteTicketCategory,
-  getTicketCategoriesByEvent
+  deleteTicketCategory
 } from "../controllers/ticketCategoryController.js";
 
 const router = express.Router();
