@@ -5,7 +5,6 @@ export const findAll = async () => {
         SELECT
             id,
             category_name,
-            price,
             created_at,
             updated_at
         FROM ticket_categories
@@ -20,7 +19,6 @@ export const findById = async (id) => {
         SELECT
             id,
             category_name,
-            price,
             created_at,
             updated_at
         FROM ticket_categories
@@ -36,7 +34,8 @@ export const findByName = async (categoryName) => {
         SELECT
             id,
             category_name,
-            price
+            created_at,
+            updated_at
         FROM ticket_categories
         WHERE category_name = ?
         LIMIT 1
@@ -45,41 +44,25 @@ export const findByName = async (categoryName) => {
     return rows[0];
 };
 
-export const create = async ({
-    category_name,
-    price,
-}) => {
+export const create = async (categoryName) => {
     const [result] = await db.query(`
         INSERT INTO ticket_categories (
-            category_name,
-            price
+            category_name
         )
-        VALUES (?, ?)
-    `, [
-        category_name,
-        price,
-    ]);
+        VALUES (?)
+    `, [categoryName]);
 
     return findById(result.insertId);
 };
 
-export const update = async (
-    id,
-    {
-        category_name,
-        price,
-    }
-) => {
+export const update = async (id, categoryName) => {
     await db.query(`
         UPDATE ticket_categories
-        SET
-            category_name = ?,
-            price = ?
+        SET category_name = ?
         WHERE id = ?
     `, [
-        category_name,
-        price,
-        id,
+        categoryName,
+        id
     ]);
 
     return findById(id);
