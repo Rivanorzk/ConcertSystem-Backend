@@ -20,12 +20,17 @@ export async function findAll({
             e.latitude,
             e.longitude,
             e.created_at,
-            e.updated_at
+            e.updated_at,
+
+            MIN(etc.price) AS price
 
         FROM events e
 
         LEFT JOIN categories c
             ON c.id = e.category_id
+
+        LEFT JOIN event_ticket_categories etc
+            ON etc.event_id = e.id
 
         WHERE 1 = 1
     `;
@@ -49,6 +54,25 @@ export async function findAll({
             keyword
         );
     }
+
+    sql += `
+        GROUP BY
+            e.id,
+            e.admin_id,
+            e.category_id,
+            c.category_name,
+            e.title,
+            e.description,
+            e.location,
+            e.poster,
+            e.event_date,
+            e.start_time,
+            e.status,
+            e.latitude,
+            e.longitude,
+            e.created_at,
+            e.updated_at
+    `;
 
     switch (sort) {
         case "latest":
