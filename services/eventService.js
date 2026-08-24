@@ -1,22 +1,26 @@
 import AppError from "../utils/AppError.js";
 import * as eventRepository from "../repositories/eventRepository.js";
 
-// Di eventService.js, pastikan data category_id dikembalikan sebagai number
-export async function getEvents(params = {}) {
+// Di services/eventService.js (backend)
+export async function getEvents(queryParams) {
     try {
-        const events = await eventRepository.findAll(params);
+        // Ekstrak parameter dari query
+        const { search = "", category = "", sort = "latest" } = queryParams;
         
-        // Pastikan category_id adalah number
-        return events.map(event => ({
-            ...event,
-            category_id: Number(event.category_id),
-            price: Number(event.price) || 0
-        }));
+        // Panggil repository dengan parameter yang benar
+        const events = await eventRepository.findAll({
+            search,
+            category, // Ini akan menjadi ID kategori
+            sort
+        });
+        
+        return events;
     } catch (error) {
-        console.error('Error getting events:', error);
+        console.error('Error in eventService.getEvents:', error);
         throw error;
     }
 }
+
 export const getEventById = async (id) => {
 
     const event = await eventRepository.findById(id);

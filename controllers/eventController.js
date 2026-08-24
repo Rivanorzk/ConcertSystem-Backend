@@ -3,20 +3,25 @@ import { success } from "../utils/response.js";
 import * as eventService from "../services/eventService.js";
 
 export async function getEvents(req, res) {
-
     try {
+        console.log('Query params:', req.query); // Debug
+        
         const events = await eventService.getEvents(req.query);
-
+        
+        console.log('Events found:', events?.length || 0); // Debug
+        console.log('First event:', events?.[0]); // Debug
+        
         res.json({
             success: true,
             message: "Success",
-            data: events
+            data: events || []
         });
     } catch (err) {
-        console.log(err);
+        console.error('Error in getEvents controller:', err);
         res.status(500).json({
             success: false,
-            message: err.message
+            message: err.message || "Failed to fetch events",
+            data: []
         });
     }
 }

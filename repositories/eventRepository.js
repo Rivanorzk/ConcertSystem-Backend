@@ -2,7 +2,7 @@ import db from "../lib/database.js";
 
 export async function findAll({
     search = "",
-    category = "",
+    category = "", // Ini akan berisi ID kategori
     sort = "latest",
 } = {}) {
     let sql = `
@@ -38,6 +38,9 @@ export async function findAll({
 
     const values = [];
 
+    // ✅ HANYA TAMPILKAN EVENT DENGAN STATUS PUBLISHED
+    sql += ` AND e.status = 'published' `;
+
     if (search) {
         sql += `
             AND (
@@ -49,19 +52,13 @@ export async function findAll({
 
         const keyword = `%${search}%`;
 
-        values.push(
-            keyword,
-            keyword,
-            keyword
-        );
+        values.push(keyword, keyword, keyword);
     }
 
+    // ✅ PERBAIKAN: Filter berdasarkan ID, bukan nama
     if (category && category !== "All") {
-        sql += `
-            AND c.category_name = ?
-        `;
-
-        values.push(category);
+        sql += ` AND e.category_id = ? `; // ← Perbaikan di sini
+        values.push(category); // Kirim ID kategori
     }
 
     sql += `
@@ -87,20 +84,22 @@ export async function findAll({
         case "latest":
             sql += ` ORDER BY e.created_at DESC `;
             break;
-
         case "oldest":
             sql += ` ORDER BY e.created_at ASC `;
             break;
-
         case "date":
             sql += ` ORDER BY e.event_date ASC `;
             break;
-
         default:
             sql += ` ORDER BY e.created_at DESC `;
     }
 
+    console.log('SQL Query:', sql); // Debug
+    console.log('Values:', values); // Debug
+
     const [rows] = await db.query(sql, values);
+    
+    console.log('Found events:', rows.length); // Debug
 
     return rows;
 }

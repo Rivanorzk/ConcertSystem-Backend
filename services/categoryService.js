@@ -5,7 +5,6 @@ export const getAllCategories = async () => {
    try {
         const categories = await categoryRepository.findAll();
         
-        // Pastikan id adalah number
         return categories.map(category => ({
             ...category,
             id: Number(category.id)
