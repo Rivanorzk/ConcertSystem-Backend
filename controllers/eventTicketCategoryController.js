@@ -30,8 +30,7 @@ export const getEventTicketCategoriesByEvent = async (
     try {
         const { eventId } = req.params;
 
-        const data =
-            await repository.findByEvent(eventId);
+        const data = await repository.findByEvent(eventId);
 
         return res.status(200).json({
             success: true,
@@ -57,8 +56,7 @@ export const getEventTicketCategoryById = async (
     try {
         const { id } = req.params;
 
-        const data =
-            await repository.findById(id);
+        const data = await repository.findById(id);
 
         if (!data) {
             return res.status(404).json({
@@ -92,13 +90,25 @@ export const createEventTicketCategory = async (
         const {
             event_id,
             ticket_category_id,
-            stock
+            price,
+            stock,
         } = req.body;
 
         if (!event_id || !ticket_category_id) {
             return res.status(400).json({
                 success: false,
                 message: "Event and ticket category are required."
+            });
+        }
+
+        if (
+            price === undefined ||
+            price === null ||
+            Number(price) < 0
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Price must be a valid number."
             });
         }
 
@@ -153,6 +163,7 @@ export const createEventTicketCategory = async (
             await repository.create({
                 event_id,
                 ticket_category_id,
+                price: Number(price),
                 stock: Number(stock)
             });
 
@@ -182,7 +193,7 @@ export const updateEventTicketCategory = async (
 ) => {
     try {
         const { id } = req.params;
-        const { stock } = req.body;
+        const { price, stock } = req.body;
 
         const existing =
             await repository.findById(id);
@@ -191,6 +202,17 @@ export const updateEventTicketCategory = async (
             return res.status(404).json({
                 success: false,
                 message: "Event ticket category not found."
+            });
+        }
+
+        if (
+            price === undefined ||
+            price === null ||
+            Number(price) < 0
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Price must be a valid number."
             });
         }
 
@@ -224,6 +246,7 @@ export const updateEventTicketCategory = async (
 
         const data =
             await repository.update(id, {
+                price: Number(price),
                 stock: newStock,
                 remaining_stock: remainingStock
             });

@@ -6,6 +6,7 @@ export const findAll = async () => {
             etc.id,
             etc.event_id,
             etc.ticket_category_id,
+            etc.price,
             etc.stock,
             etc.remaining_stock,
             etc.created_at,
@@ -34,6 +35,7 @@ export const findById = async (id) => {
             etc.id,
             etc.event_id,
             etc.ticket_category_id,
+            etc.price,
             etc.stock,
             etc.remaining_stock,
             etc.created_at,
@@ -63,6 +65,7 @@ export const findByEvent = async (eventId) => {
             etc.id,
             etc.event_id,
             etc.ticket_category_id,
+            etc.price,
             etc.stock,
             etc.remaining_stock,
 
@@ -105,13 +108,15 @@ export const create = async (data) => {
         INSERT INTO event_ticket_categories (
             event_id,
             ticket_category_id,
+            price,
             stock,
             remaining_stock
         )
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
     `, [
         data.event_id,
         data.ticket_category_id,
+        data.price,
         data.stock,
         data.stock
     ]);
@@ -123,10 +128,12 @@ export const update = async (id, data) => {
     await db.query(`
         UPDATE event_ticket_categories
         SET
+            price = ?,
             stock = ?,
             remaining_stock = ?
         WHERE id = ?
     `, [
+        data.price,
         data.stock,
         data.remaining_stock,
         id
@@ -187,6 +194,7 @@ export const findByIdForUpdate = async (
             id,
             event_id,
             ticket_category_id,
+            price,
             stock,
             remaining_stock
         FROM event_ticket_categories
