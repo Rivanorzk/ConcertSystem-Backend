@@ -2,6 +2,7 @@ import db from "../lib/database.js";
 
 export async function findAll({
     search = "",
+    category = "",
     sort = "latest",
 } = {}) {
     let sql = `
@@ -55,6 +56,14 @@ export async function findAll({
         );
     }
 
+    if (category && category !== "All") {
+        sql += `
+            AND c.category_name = ?
+        `;
+
+        values.push(category);
+    }
+
     sql += `
         GROUP BY
             e.id,
@@ -76,27 +85,19 @@ export async function findAll({
 
     switch (sort) {
         case "latest":
-            sql += `
-                ORDER BY e.created_at DESC
-            `;
+            sql += ` ORDER BY e.created_at DESC `;
             break;
 
         case "oldest":
-            sql += `
-                ORDER BY e.created_at ASC
-            `;
+            sql += ` ORDER BY e.created_at ASC `;
             break;
 
         case "date":
-            sql += `
-                ORDER BY e.event_date ASC
-            `;
+            sql += ` ORDER BY e.event_date ASC `;
             break;
 
         default:
-            sql += `
-                ORDER BY e.created_at DESC
-            `;
+            sql += ` ORDER BY e.created_at DESC `;
     }
 
     const [rows] = await db.query(sql, values);
