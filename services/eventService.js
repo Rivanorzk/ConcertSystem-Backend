@@ -1,12 +1,22 @@
 import AppError from "../utils/AppError.js";
 import * as eventRepository from "../repositories/eventRepository.js";
 
-export async function getEvents(query) {
-
-    return await eventRepository.findAll(query);
-
+// Di eventService.js, pastikan data category_id dikembalikan sebagai number
+export async function getEvents(params = {}) {
+    try {
+        const events = await eventRepository.findAll(params);
+        
+        // Pastikan category_id adalah number
+        return events.map(event => ({
+            ...event,
+            category_id: Number(event.category_id),
+            price: Number(event.price) || 0
+        }));
+    } catch (error) {
+        console.error('Error getting events:', error);
+        throw error;
+    }
 }
-
 export const getEventById = async (id) => {
 
     const event = await eventRepository.findById(id);

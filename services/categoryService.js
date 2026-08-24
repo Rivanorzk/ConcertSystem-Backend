@@ -2,7 +2,18 @@ import * as categoryRepository from "../repositories/categoryRepository.js";
 import AppError from "../utils/AppError.js";
 
 export const getAllCategories = async () => {
-    return await categoryRepository.findAll();
+   try {
+        const categories = await categoryRepository.findAll();
+        
+        // Pastikan id adalah number
+        return categories.map(category => ({
+            ...category,
+            id: Number(category.id)
+        }));
+    } catch (error) {
+        console.error('Error getting categories:', error);
+        throw error;
+    }
 };
 
 export const getCategoryById = async (id) => {
