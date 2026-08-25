@@ -8,12 +8,12 @@ import {
     deleteNotification,
     deleteAllNotifications
 } from "../controllers/notificationController.js";
-import { authenticate } from "../middlewares/authMiddleware.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 // Semua route memerlukan authentication
-router.use(authenticate);
+router.use(authMiddleware);
 
 router.get("/", getNotifications);
 router.get("/unread-count", getUnreadCount);
