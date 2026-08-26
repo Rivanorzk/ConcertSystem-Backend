@@ -19,6 +19,8 @@ import {
   updateMyPassword,
   getMyProfile
 } from "../controllers/userController.js";
+import upload from "../middlewares/upload.js";
+import { uploadAvatar } from "../controllers/userController.js";
 
 const router = express.Router();
 
@@ -29,5 +31,12 @@ router.put("/me/password", authMiddleware, validate(updatePasswordSchema), updat
 router.put("/:id/role", authMiddleware, checkRole("superadmin"), validate(updateRoleSchema), updateRole);
 router.put("/:id/status", authMiddleware, checkRole("admin", "superadmin"), validate(updateStatusSchema), updateStatus);
 router.delete("/:id", authMiddleware, checkRole("superadmin"), deleteUser);
+router.post(
+    "/me/avatar",
+    authMiddleware,
+    upload.single("avatar"),
+    uploadAvatar
+);
+
 
 export default router;

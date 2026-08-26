@@ -123,3 +123,17 @@ export const deleteUser = asyncHandler(async (req, res) => {
     );
 
 });
+
+export const uploadAvatar = asyncHandler(async (req, res) => {
+    if (!req.file) {
+        throw new AppError("Tidak ada file yang diupload", 400);
+    }
+
+    const avatarUrl = req.file.path; 
+    
+    const updatedUser = await userService.updateProfile(req.user.id, {
+        profile_image: avatarUrl
+    });
+
+    return success(res, updatedUser, "Avatar berhasil diupdate");
+});
