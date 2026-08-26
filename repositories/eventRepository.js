@@ -104,31 +104,49 @@ export async function findAll({
     return rows;
 }
 
+// repositories/eventRepository.js
+
 export const findById = async (id) => {
-    const [rows] = await db.query(
-        `
+    // 1. Ambil data event
+    const [eventRows] = await db.query(`
         SELECT
             e.*,
             c.category_name,
-
             u.id AS admin_user_id,
             u.username AS admin_username,
             u.email AS admin_email
-
         FROM events e
-
-        LEFT JOIN categories c
-            ON c.id = e.category_id
-
-        LEFT JOIN users u
-            ON e.admin_id = u.id
-
+        LEFT JOIN categories c ON c.id = e.category_id
+        LEFT JOIN users u ON e.admin_id = u.id
         WHERE e.id = ?
-        `,
-        [id]
-    );
+    `, [id]);
 
-    return rows[0];
+    if (!eventRows[0]) return null;
+
+    const event = eventRows[0];
+
+    // 2. Ambil ticket categories untuk event ini
+    const [ticketRows] = await db.query(`
+        SELECT
+            etc.id,
+            etc.event_id,
+            etc.ticket_category_id,
+            etc.price,
+            etc.stock,
+            etc.remaining_stock,
+            tc.category_name
+        FROM event_ticket_categories etc
+        INNER JOIN ticket_categories tc 
+            ON etc.ticket_category_id = tc.id
+        WHERE etc.event_id = ?
+        ORDER BY tc.category_name ASC
+    `, [id]);
+
+    // 3. Gabungkan
+    return {
+        ...event,
+        ticket_categories: ticketRows || []
+    };
 };
 
 export const create = async (data) => {
