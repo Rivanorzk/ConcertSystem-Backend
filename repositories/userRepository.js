@@ -45,6 +45,28 @@ export const findById = async (id) => {
 
 };
 
+export const findByIdWithPassword = async (id) => {
+    const [rows] = await db.query(
+        `
+        SELECT
+            id,
+            username,
+            email,
+            phone,
+            profile_image,
+            role,
+            status,
+            is_active,
+            password, 
+            created_at
+        FROM users
+        WHERE id = ?
+        `,
+        [id]
+    );
+    return rows[0];
+};
+
 export const updateProfile = async (id, data) => {
 
     await db.query(

@@ -62,19 +62,16 @@ export const updateMyPassword = asyncHandler(async (req, res) => {
     const userId = req.user.id;
     const { currentPassword, newPassword } = req.body;
 
-    // 1. Ambil user dari database (termasuk password hash)
-    const user = await userService.getUserById(userId);
-    if (!user) {
-        throw new AppError("User tidak ditemukan", 404);
-    }
+    // Ambil user dengan password
+    const user = await userService.getUserWithPassword(userId);
 
-    // 2. Verifikasi current password
+    // Verifikasi current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
         throw new AppError("Current password salah", 400);
     }
 
-    // 3. Update password
+    // Update password
     await userService.updatePassword(userId, newPassword);
 
     return success(res, null, "Password berhasil diperbarui");

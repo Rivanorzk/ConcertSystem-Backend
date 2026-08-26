@@ -74,3 +74,11 @@ export const deleteUser = async (id) => {
     await userRepository.remove(id);
 
 };
+
+export const getUserWithPassword = async (id) => {
+    const user = await userRepository.findByIdWithPassword(id);
+    if (!user) {
+        throw new AppError("User tidak ditemukan", 404);
+    }
+    return user;
+};
