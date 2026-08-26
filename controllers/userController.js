@@ -1,6 +1,7 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import { success } from "../utils/response.js";
 import AppError from "../utils/AppError.js";
+import bcrypt from "bcrypt"
 
 import * as userService from "../services/userService.js";
 
