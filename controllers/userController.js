@@ -58,18 +58,25 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
 });
 
 export const updateMyPassword = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
 
-    await userService.updatePassword(
-        req.user.id,
-        req.body.password
-    );
+    // 1. Ambil user dari database (termasuk password hash)
+    const user = await userService.getUserById(userId);
+    if (!user) {
+        throw new AppError("User tidak ditemukan", 404);
+    }
 
-    return success(
-        res,
-        null,
-        "Password berhasil diperbarui"
-    );
+    // 2. Verifikasi current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+        throw new AppError("Current password salah", 400);
+    }
 
+    // 3. Update password
+    await userService.updatePassword(userId, newPassword);
+
+    return success(res, null, "Password berhasil diperbarui");
 });
 
 export const updateRole = asyncHandler(async (req, res) => {

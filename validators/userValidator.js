@@ -1,3 +1,4 @@
+// validators/userValidator.js
 import Joi from "joi";
 
 export const updateProfileSchema = Joi.object({
@@ -8,7 +9,16 @@ export const updateProfileSchema = Joi.object({
 }).min(1);
 
 export const updatePasswordSchema = Joi.object({
-    password: Joi.string().min(8).required()
+    currentPassword: Joi.string().min(8).required()
+        .messages({
+            'string.min': 'Password minimal 8 karakter',
+            'any.required': 'Current password wajib diisi'
+        }),
+    newPassword: Joi.string().min(8).required()
+        .messages({
+            'string.min': 'Password baru minimal 8 karakter',
+            'any.required': 'New password wajib diisi'
+        })
 });
 
 export const updateRoleSchema = Joi.object({
