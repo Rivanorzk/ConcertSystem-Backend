@@ -4,7 +4,7 @@ import AppError from "../utils/AppError.js";
 import generateInvoice from "../utils/generateInvoice.js";
 
 import * as eventRepository from "../repositories/eventRepository.js";
-import * as ticketCategoryRepository from "../repositories/ticketCategoryRepository.js";
+import * as eventTicketCategoryRepository from "../repositories/eventTicketCategoryRepository.js";
 import * as voucherRepository from "../repositories/voucherRepository.js";
 import * as orderRepository from "../repositories/orderRepository.js";
 
@@ -20,7 +20,7 @@ export const createOrder = async (userId, body) => {
         // Validasi Event
         // =========================
 
-        const event = await eventRepository.getEventById(body.event_id);
+        const event = await eventRepository.findById(body.event_id);
 
         if (!event) {
             throw new AppError("Event tidak ditemukan", 404);
@@ -38,7 +38,7 @@ export const createOrder = async (userId, body) => {
         for (const item of body.tickets) {
 
             const category =
-                await ticketCategoryRepository.getTicketCategoryByIdForUpdate(
+                await eventTicketCategoryRepository.findByIdForUpdate(
                     connection,
                     item.ticket_category_id
                 );
@@ -49,7 +49,7 @@ export const createOrder = async (userId, body) => {
 
             if (category.remaining_stock < item.quantity) {
                 throw new AppError(
-                    `Stok ${category.category_name} tidak mencukupi`,
+                    `Stok tiket tidak mencukupi (tersisa ${category.remaining_stock})`,
                     400
                 );
             }
@@ -172,7 +172,7 @@ export const createOrder = async (userId, body) => {
                 }
             );
 
-            await ticketCategoryRepository.updateRemainingStock(
+            await eventTicketCategoryRepository.updateRemainingStock(
                 connection,
                 detail.ticket_category_id,
                 detail.quantity
@@ -275,7 +275,7 @@ export const cancelOrder = async (orderId, userId, userRole) => {
 
         for (const detail of details) {
 
-            await ticketCategoryRepository.increaseRemainingStock(
+            await eventTicketCategoryRepository.increaseRemainingStock(
                 connection,
                 detail.ticket_category_id,
                 detail.quantity
