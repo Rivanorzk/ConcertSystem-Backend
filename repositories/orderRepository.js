@@ -83,8 +83,10 @@ export const getOrderDetails = async (orderId) => {
             od.*,
             tc.category_name
         FROM order_details od
+        JOIN event_ticket_categories etc
+            ON od.event_ticket_category_id = etc.id
         JOIN ticket_categories tc
-            ON od.ticket_category_id = tc.id
+            ON etc.ticket_category_id = tc.id
         WHERE od.order_id = ?
         `,
         [orderId]
@@ -140,7 +142,7 @@ export const createOrderDetail = async (
         `
         INSERT INTO order_details (
             order_id,
-            ticket_category_id,
+            event_ticket_category_id,
             quantity,
             price,
             subtotal
@@ -192,5 +194,3 @@ export const deleteOrder = async (
     );
 
 };
-
-

@@ -277,7 +277,7 @@ export const cancelOrder = async (orderId, userId, userRole) => {
 
             await eventTicketCategoryRepository.increaseRemainingStock(
                 connection,
-                detail.ticket_category_id,
+                detail.event_ticket_category_id,
                 detail.quantity
             );
 
