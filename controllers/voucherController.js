@@ -2,6 +2,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { success } from "../utils/response.js";
 
 import * as voucherService from "../services/voucherService.js";
+import * as auditLogService from "../services/auditlogService.js";
 
 export const getVouchers = asyncHandler(async (req, res) => {
 
@@ -53,7 +54,18 @@ export const updateVoucher = asyncHandler(async (req, res) => {
 
 export const deleteVoucher = asyncHandler(async (req, res) => {
 
+    const voucher =
+        await voucherService.getVoucherById(req.params.id);
+
     await voucherService.deleteVoucher(req.params.id);
+
+    await auditLogService.logActivity({
+        actor: req.user,
+        action: "DELETE_VOUCHER",
+        entityType: "voucher",
+        entityId: req.params.id,
+        description: `Menghapus voucher "${voucher.promo_code}"`,
+    });
 
     return success(
         res,

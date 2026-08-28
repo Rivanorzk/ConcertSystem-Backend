@@ -12,7 +12,8 @@ import orderRoutes from "./routes/orderRoute.js";
 import paymentRoutes from "./routes/paymentRoute.js";
 import ticketRoutes from "./routes/ticketRoute.js";
 import redemptionRoutes from "./routes/redemptionRoute.js";
-import notificationRoutes from "./routes/notificationRoute.js"
+import notificationRoutes from "./routes/notificationRoute.js";
+import auditlogRoutes from "./routes/auditlogRoute.js";
 import notFoundMiddleware from "./middlewares/notFoundMIddleware.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 
@@ -42,6 +43,7 @@ app.use("/payments", paymentRoutes);
 app.use("/tickets", ticketRoutes);
 app.use("/redemptions", redemptionRoutes);
 app.use("/notifications", notificationRoutes);
+app.use("/audit-logs", auditlogRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

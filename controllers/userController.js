@@ -4,6 +4,7 @@ import AppError from "../utils/AppError.js";
 import bcrypt from "bcrypt"
 
 import * as userService from "../services/userService.js";
+import * as auditLogService from "../services/auditlogService.js";
 
 const isStaff = (role) => ["admin", "superadmin"].includes(role);
 
@@ -79,11 +80,22 @@ export const updateMyPassword = asyncHandler(async (req, res) => {
 
 export const updateRole = asyncHandler(async (req, res) => {
 
+    const targetBefore =
+        await userService.getUserById(req.params.id);
+
     const user =
         await userService.updateRole(
             req.params.id,
             req.body.role
         );
+
+    await auditLogService.logActivity({
+        actor: req.user,
+        action: "UPDATE_USER_ROLE",
+        entityType: "user",
+        entityId: req.params.id,
+        description: `Mengubah role "${targetBefore.username}" dari ${targetBefore.role} menjadi ${req.body.role}`,
+    });
 
     return success(
         res,
@@ -112,9 +124,20 @@ export const updateStatus = asyncHandler(async (req, res) => {
 
 export const deleteUser = asyncHandler(async (req, res) => {
 
+    const target =
+        await userService.getUserById(req.params.id);
+
     await userService.deleteUser(
         req.params.id
     );
+
+    await auditLogService.logActivity({
+        actor: req.user,
+        action: "DELETE_USER",
+        entityType: "user",
+        entityId: req.params.id,
+        description: `Menghapus user "${target.username}" (${target.role})`,
+    });
 
     return success(
         res,

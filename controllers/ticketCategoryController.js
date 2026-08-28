@@ -1,4 +1,5 @@
 import * as ticketCategoryRepository from "../repositories/ticketCategoryRepository.js";
+import * as auditLogService from "../services/auditlogService.js";
 
 export const getTicketCategories = async (req, res) => {
     try {
@@ -158,6 +159,14 @@ export const deleteTicketCategory = async (req, res) => {
         }
 
         await ticketCategoryRepository.remove(id);
+
+        await auditLogService.logActivity({
+            actor: req.user,
+            action: "DELETE_TICKET_CATEGORY",
+            entityType: "ticket_category",
+            entityId: id,
+            description: `Menghapus kategori tiket "${existing.category_name}"`,
+        });
 
         return res.status(200).json({
             success: true,
