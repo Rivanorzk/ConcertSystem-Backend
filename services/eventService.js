@@ -5,13 +5,14 @@ import * as eventRepository from "../repositories/eventRepository.js";
 export async function getEvents(queryParams) {
     try {
         // Ekstrak parameter dari query
-        const { search = "", category = "", sort = "latest" } = queryParams;
+        const { search = "", category = "", sort = "latest", status = "published" } = queryParams;
         
         // Panggil repository dengan parameter yang benar
         const events = await eventRepository.findAll({
             search,
             category, // Ini akan menjadi ID kategori
-            sort
+            sort,
+            status, // "all" dipakai admin/superadmin, default "published" untuk publik
         });
         
         return events;

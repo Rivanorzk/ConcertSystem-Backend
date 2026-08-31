@@ -80,17 +80,45 @@ export const createPayment = async (userId, orderId) => {
         const transaction =
             await snap.createTransaction(parameter);
 
-        await paymentRepository.createPayment(
-            connection,
-            {
-                order_id: order.id,
-                midtrans_order_id: order.invoice_number,
-                snap_token: transaction.token,
-                gross_amount: order.final_price,
-                expiry_time: order.expired_at,
-                payment_url: transaction.redirect_url
+        try {
+
+            await paymentRepository.createPayment(
+                connection,
+                {
+                    order_id: order.id,
+                    midtrans_order_id: order.invoice_number,
+                    snap_token: transaction.token,
+                    gross_amount: order.final_price,
+                    expiry_time: order.expired_at,
+                    payment_url: transaction.redirect_url
+                }
+            );
+
+        } catch (insertErr) {
+
+            // Race condition: ada request lain yang berhasil insert payment
+            // untuk order yang sama sepersekian detik lebih dulu (mis. dua
+            // tab dibuka bersamaan, atau efek dobel di React dev mode).
+            // Daripada gagal, kembalikan payment yang sudah dibuat itu.
+            if (insertErr.code === "ER_DUP_ENTRY") {
+
+                const racedPayment =
+                    await paymentRepository.getPaymentByOrderId(order.id);
+
+                if (racedPayment) {
+                    await connection.commit();
+
+                    return {
+                        snap_token: racedPayment.snap_token,
+                        redirect_url: racedPayment.payment_url
+                    };
+                }
+
             }
-        );
+
+            throw insertErr;
+
+        }
 
         await connection.commit();
 

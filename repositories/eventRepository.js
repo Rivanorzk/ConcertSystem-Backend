@@ -4,6 +4,7 @@ export async function findAll({
     search = "",
     category = "", // Ini akan berisi ID kategori
     sort = "latest",
+    status = "published", // default: perilaku publik/customer tetap sama persis
 } = {}) {
     let sql = `
         SELECT
@@ -38,8 +39,13 @@ export async function findAll({
 
     const values = [];
 
-    // ✅ HANYA TAMPILKAN EVENT DENGAN STATUS PUBLISHED
-    sql += ` AND e.status = 'published' `;
+    // status = "all" dipakai oleh panel admin/superadmin untuk melihat
+    // semua status (draft/published/finished/cancelled). Selain itu,
+    // filter ke status tertentu (default "published" untuk halaman publik).
+    if (status && status !== "all") {
+        sql += ` AND e.status = ? `;
+        values.push(status);
+    }
 
     if (search) {
         sql += `
