@@ -24,6 +24,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
+      "https://concert-system-frontend-gghvac19v-rivanos-projects.vercel.app"
     ],
     credentials: true,
   })
