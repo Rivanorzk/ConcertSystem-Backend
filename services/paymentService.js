@@ -13,72 +13,82 @@ import generateTicketCode from "../utils/generateTicketCode.js";
 
 export const createPayment = async (userId, orderId) => {
 
+    // Baca data order dulu pakai pool biasa (cepat, tidak nge-hold koneksi
+    // lama). Koneksi transaksi baru dibuka belakangan, sesaat sebelum nulis.
+    const order =
+        await orderRepository.getOrderWithCustomer(orderId);
+
+    if (!order) {
+        throw new AppError(
+            "Order tidak ditemukan",
+            404
+        );
+    }
+
+    if (order.customer_id !== userId) {
+        throw new AppError(
+            "Anda tidak memiliki akses ke order ini",
+            403
+        );
+    }
+
+    if (["paid", "expired", "cancelled"].includes(order.status)) {
+        throw new AppError(
+            "Order tidak dapat diproses",
+            400
+        );
+    }
+
+    const existingPayment =
+        await paymentRepository.getPaymentByOrderId(order.id);
+
+    if (existingPayment) {
+        return {
+            snap_token: existingPayment.snap_token,
+            redirect_url: existingPayment.payment_url
+        };
+    }
+
+    // =========================
+    // Panggil Midtrans DI LUAR transaksi DB — ini request jaringan ke
+    // server Midtrans yang bisa makan waktu, jangan sampai nge-hold
+    // koneksi database selama itu.
+    // =========================
+
+    const parameter = {
+
+        transaction_details: {
+
+            order_id: order.invoice_number,
+
+            gross_amount: Number(order.final_price)
+
+        },
+
+        customer_details: {
+
+            first_name: order.username,
+
+            email: order.email,
+
+            phone: order.phone
+
+        }
+
+    };
+
+    const transaction =
+        await snap.createTransaction(parameter);
+
+    // =========================
+    // Baru sekarang buka transaksi DB, cuma buat nulis hasilnya. Cepat.
+    // =========================
+
     const connection = await db.getConnection();
 
     try {
 
         await connection.beginTransaction();
-
-        const order =
-            await orderRepository.getOrderWithCustomer(orderId);
-
-        if (!order) {
-            throw new AppError(
-                "Order tidak ditemukan",
-                404
-            );
-        }
-
-        if (order.customer_id !== userId) {
-            throw new AppError(
-                "Anda tidak memiliki akses ke order ini",
-                403
-            );
-        }
-
-        if (["paid", "expired", "cancelled"].includes(order.status)) {
-            throw new AppError(
-                "Order tidak dapat diproses",
-                400
-            );
-        }
-
-        const existingPayment =
-            await paymentRepository.getPaymentByOrderId(order.id);
-
-        if (existingPayment) {
-            await connection.commit();
-
-            return {
-                snap_token: existingPayment.snap_token,
-                redirect_url: existingPayment.payment_url
-            };
-        }
-
-        const parameter = {
-
-            transaction_details: {
-
-                order_id: order.invoice_number,
-
-                gross_amount: Number(order.final_price)
-
-            },
-
-            customer_details: {
-
-                first_name: order.username,
-
-                email: order.email,
-
-                phone: order.phone
-
-            }
-
-        };
-
-        const transaction =
-            await snap.createTransaction(parameter);
 
         try {
 
