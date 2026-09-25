@@ -6,6 +6,7 @@ import {
     createEventTicketCategory,
     updateEventTicketCategory,
     deleteEventTicketCategory,
+    getEventTicketCategoryDetail,
 } from "../controllers/eventTicketCategoryController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -45,5 +46,7 @@ router.delete(
     checkRole("admin", "superadmin"),
     deleteEventTicketCategory
 );
+
+router.get("/:id/detail", authMiddleware, getEventTicketCategoryDetail);
 
 export default router;

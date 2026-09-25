@@ -1,6 +1,9 @@
 import * as repository from "../lib/repositories/eventTicketCategoryRepository.js";
 import * as eventRepository from "../lib/repositories/eventRepository.js";
 import * as ticketCategoryRepository from "../lib/repositories/ticketCategoryRepository.js";
+import * as areaRepository from "../lib/repositories/eventTicketAreaRepository.js"
+import * as benefitRepository from "../lib/repositories/eventTicketBenefitRepository.js"
+import * as ruleRepository from "../lib/repositories/eventTicketRuleRepository.js"
 
 export const getEventTicketCategories = async (req, res) => {
     try {
@@ -306,5 +309,30 @@ export const deleteEventTicketCategory = async (
             message:
                 "Failed to delete event ticket category."
         });
+    }
+};
+
+export const getEventTicketCategoryDetail = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const category = await repository.findById(id);
+        if (!category) {
+            return res.status(404).json({ success: false, message: "Event ticket category not found." });
+        }
+
+        const [areas, benefits, rules] = await Promise.all([
+            areaRepository.findByEventTicketCategoryId(id),
+            benefitRepository.findByEventTicketCategoryId(id),
+            ruleRepository.findByEventTicketCategoryId(id),
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            data: { ...category, areas, benefits, rules },
+        });
+    } catch (error) {
+        console.error("Get event ticket category detail error:", error);
+        return res.status(500).json({ success: false, message: "Failed to get event ticket category detail." });
     }
 };

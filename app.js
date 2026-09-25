@@ -16,8 +16,12 @@ import notificationRoutes from "./routes/notificationRoute.js";
 import eventReminderRoutes from "./routes/eventReminderRoute.js";
 import auditlogRoutes from "./routes/auditlogRoute.js";
 import dashboardRoutes from "./routes/dashboardRoute.js";
+import eventTicketAreaRoutes from "./routes/eventTicketAreaRoute.js";
+import eventTicketBenefitRoutes from "./routes/eventTicketBenefitRoute.js";
+import eventTicketRuleRoutes from "./routes/eventTicketRuleRoute.js";
 import notFoundMiddleware from "./middleware/notFoundMIddleware.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
+import { startScheduler } from "./lib/utils/scheduler.js";
 
 dotenv.config();
 const app = express();
@@ -50,9 +54,13 @@ app.use("/notifications", notificationRoutes);
 app.use("/reminders", eventReminderRoutes);
 app.use("/audit-logs", auditlogRoutes);
 app.use("/dashboard", dashboardRoutes);
+app.use("/event-ticket-areas", eventTicketAreaRoutes);
+app.use("/event-ticket-benefits", eventTicketBenefitRoutes);
+app.use("/event-ticket-rules", eventTicketRuleRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
+startScheduler();
 
 app.listen(4000, () => {
   console.log("Server running on port 4000");
