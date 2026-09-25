@@ -7,7 +7,9 @@ import * as ruleRepository from "../lib/repositories/eventTicketRuleRepository.j
 
 export const getEventTicketCategories = async (req, res) => {
     try {
-        const data = await repository.findAll();
+        const { eventId } = req.params;
+
+        const data = await repository.findByEvent(eventId);
 
         return res.status(200).json({
             success: true,
