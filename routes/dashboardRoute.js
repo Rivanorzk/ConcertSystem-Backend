@@ -7,6 +7,7 @@ import {
     getCustomerDashboard,
     getAdminDashboard,
     getSuperadminDashboard,
+    getEventAnalytics,
 } from "../controllers/dashboardController.js";
 
 const router = express.Router();
@@ -30,6 +31,13 @@ router.get(
     authMiddleware,
     checkRole("superadmin"),
     getSuperadminDashboard
+);
+
+router.get(
+    "/events/:id/analytics",
+    authMiddleware,
+    checkRole("admin", "superadmin"),
+    getEventAnalytics
 );
 
 export default router;

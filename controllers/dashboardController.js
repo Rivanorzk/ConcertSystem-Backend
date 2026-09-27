@@ -37,3 +37,22 @@ export const getSuperadminDashboard = asyncHandler(async (req, res) => {
     return success(res, stats);
 
 });
+
+// GET /dashboard/events/:id/analytics — dipakai halaman
+// app/admin/events/[id]/analytics/page.js (getEventAnalytics di
+// services/dashboardService.js frontend).
+export const getEventAnalytics = asyncHandler(async (req, res) => {
+
+    const range = ["7d", "30d", "all"].includes(req.query.range)
+        ? req.query.range
+        : "all";
+
+    const stats = await dashboardService.getEventAnalytics(
+        req.params.id,
+        range,
+        req.user
+    );
+
+    return success(res, stats);
+
+});
