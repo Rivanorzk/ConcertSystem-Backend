@@ -23,7 +23,7 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
     // sistem secara keseluruhan, bukan error, supaya tetap berguna
     // kalau dipakai lintas role.
     const stats = req.user.role === "superadmin"
-        ? await dashboardService.getSuperadminDashboard()
+        ? await dashboardService.getSuperadminDashboard(period)
         : await dashboardService.getAdminDashboard(req.user.id, period);
 
     return success(res, stats);
@@ -32,7 +32,10 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
 
 export const getSuperadminDashboard = asyncHandler(async (req, res) => {
 
-    const stats = await dashboardService.getSuperadminDashboard();
+    // period: "month" (default) atau "30d", sama seperti dashboard admin.
+    const period = req.query.period === "30d" ? "30d" : "month";
+
+    const stats = await dashboardService.getSuperadminDashboard(period);
 
     return success(res, stats);
 
