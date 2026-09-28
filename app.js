@@ -22,6 +22,7 @@ import eventTicketRuleRoutes from "./routes/eventTicketRuleRoute.js";
 import notFoundMiddleware from "./middleware/notFoundMIddleware.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import { startScheduler } from "./lib/utils/scheduler.js";
+import { requestMetrics } from "./lib/utils/requestMetrics.js";
 
 dotenv.config();
 const app = express();
@@ -38,6 +39,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(requestMetrics);
 
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);

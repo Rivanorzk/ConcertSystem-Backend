@@ -1,6 +1,7 @@
 import asyncHandler from "../lib/utils/asyncHandler.js";
 import { success } from "../lib/utils/response.js";
 import * as dashboardService from "../lib/services/dashboardService.js";
+import * as systemService from "../lib/services/systemService.js";
 
 export const getCustomerDashboard = asyncHandler(async (req, res) => {
 
@@ -57,5 +58,13 @@ export const getEventAnalytics = asyncHandler(async (req, res) => {
     );
 
     return success(res, stats);
+
+});
+
+export const getSystemStatus = asyncHandler(async (req, res) => {
+
+    const status = await systemService.getSystemStatus();
+
+    return success(res, status);
 
 });

@@ -7,6 +7,7 @@ import {
     getCustomerDashboard,
     getAdminDashboard,
     getSuperadminDashboard,
+    getSystemStatus,
     getEventAnalytics,
 } from "../controllers/dashboardController.js";
 
@@ -31,6 +32,13 @@ router.get(
     authMiddleware,
     checkRole("superadmin"),
     getSuperadminDashboard
+);
+
+router.get(
+    "/system",
+    authMiddleware,
+    checkRole("superadmin"),
+    getSystemStatus
 );
 
 router.get(
