@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 export const createVoucherSchema = Joi.object({
-    event_id: Joi.number().integer().positive().allow(null),
+    event_id: Joi.number().integer().positive().required(),
     title: Joi.string().min(3).required(),
     minimum_quantity: Joi.number().integer().min(1).default(1),
     promo_code: Joi.string().alphanum().min(3).required(),
@@ -11,7 +11,7 @@ export const createVoucherSchema = Joi.object({
         then: Joi.number().max(100),
     }).required(),
     maximum_discount: Joi.number().positive().allow(null),
-    quota: Joi.number().integer().min(1).required(),
+    quota: Joi.number().integer().min(1).default(1),
     start_date: Joi.date().required(),
     end_date: Joi.date().greater(Joi.ref("start_date")).required(),
     status: Joi.string().valid("draft", "active", "inactive")
@@ -33,7 +33,12 @@ export const updateVoucherSchema = Joi.object({
     status: Joi.string().valid("draft", "active", "inactive")
 }).min(1);
 
+export const redeemVoucherSchema = Joi.object({
+    promo_code: Joi.string().trim().required()
+});
+
 export const validateVoucherSchema = Joi.object({
-    promo_code: Joi.string().required(),
+    user_voucher_id: Joi.number().integer().positive().required(),
+    event_id: Joi.number().integer().positive().required(),
     total_ticket: Joi.number().integer().min(1)
 });

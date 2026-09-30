@@ -4,6 +4,10 @@ import { success } from "../lib/utils/response.js";
 import * as voucherService from "../lib/services/voucherService.js";
 import * as auditLogService from "../lib/services/auditlogService.js";
 
+// =========================
+// Admin
+// =========================
+
 export const getVouchers = asyncHandler(async (req, res) => {
 
     const vouchers =
@@ -19,6 +23,15 @@ export const getVoucherById = asyncHandler(async (req, res) => {
         await voucherService.getVoucherById(req.params.id);
 
     return success(res, voucher);
+
+});
+
+export const getVoucherRedemptions = asyncHandler(async (req, res) => {
+
+    const redemptions =
+        await voucherService.getVoucherRedemptions(req.params.id);
+
+    return success(res, redemptions);
 
 });
 
@@ -75,11 +88,55 @@ export const deleteVoucher = asyncHandler(async (req, res) => {
 
 });
 
+// =========================
+// Customer
+// =========================
+
+export const redeemVoucher = asyncHandler(async (req, res) => {
+
+    const userVoucher =
+        await voucherService.redeemVoucher(
+            req.user.id,
+            req.body.promo_code
+        );
+
+    return success(
+        res,
+        userVoucher,
+        "Voucher berhasil di-redeem",
+        201
+    );
+
+});
+
+export const getMyVouchers = asyncHandler(async (req, res) => {
+
+    const vouchers =
+        await voucherService.getMyVouchers(req.user.id);
+
+    return success(res, vouchers);
+
+});
+
+export const getAvailableVouchers = asyncHandler(async (req, res) => {
+
+    const vouchers =
+        await voucherService.getAvailableVouchers(
+            req.user.id,
+            req.query.event_id
+        );
+
+    return success(res, vouchers);
+
+});
+
 export const validateVoucher = asyncHandler(async (req, res) => {
 
     const voucher =
         await voucherService.validateVoucher(
-            req.body.promo_code,
+            req.user.id,
+            req.body.user_voucher_id,
+            req.body.event_id,
             req.body.total_ticket
         );
 
