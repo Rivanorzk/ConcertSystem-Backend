@@ -124,16 +124,21 @@ export const createEventTicketCategory = async (
         const {
             event_id,
             name,
+            ticket_category_id,
             price,
-            quota,
             description,
             is_active,
         } = req.body;
 
-        if (!event_id || !String(name || "").trim()) {
+        // Terima `quota` (nama lama) maupun `stock` (dikirim frontend).
+        const quota = req.body.quota ?? req.body.stock;
+
+        // Kategori bisa dipilih lewat ticket_category_id (lookup yang
+        // sudah ada) atau lewat nama bebas.
+        if (!event_id || (!ticket_category_id && !String(name || "").trim())) {
             return res.status(400).json({
                 success: false,
-                message: "Event dan nama kategori wajib diisi."
+                message: "Event dan kategori tiket wajib diisi."
             });
         }
 
@@ -178,7 +183,21 @@ export const createEventTicketCategory = async (
             });
         }
 
-        const category = await findOrCreateTicketCategoryByName(name);
+        let category;
+        if (ticket_category_id) {
+            category = await ticketCategoryRepository.findById(
+                ticket_category_id
+            );
+
+            if (!category) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Ticket category not found."
+                });
+            }
+        } else {
+            category = await findOrCreateTicketCategoryByName(name);
+        }
 
         const existing =
             await repository.findByEventAndCategory(
@@ -230,7 +249,8 @@ export const updateEventTicketCategory = async (
 ) => {
     try {
         const { id } = req.params;
-        const { name, price, quota, description, is_active } = req.body;
+        const { name, ticket_category_id, price, description, is_active } = req.body;
+        const quota = req.body.quota ?? req.body.stock;
 
         const existing =
             await repository.findById(id);
@@ -290,7 +310,9 @@ export const updateEventTicketCategory = async (
         // ini hanya memindahkan ticket_category_id ke baris lookup
         // yang sesuai (dibuat baru kalau nama belum pernah dipakai).
         let ticketCategoryId = existing.ticket_category_id;
-        if (name !== undefined && String(name).trim()) {
+        if (ticket_category_id) {
+            ticketCategoryId = Number(ticket_category_id);
+        } else if (name !== undefined && String(name).trim()) {
             const category = await findOrCreateTicketCategoryByName(name);
             ticketCategoryId = category.id;
         }
